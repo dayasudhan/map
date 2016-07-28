@@ -57,7 +57,7 @@
     android:layout_height="wrap_content"
     android:text="PICK LOCATION"
     android:textColor="#ffffff"
-    android:id="@+id/placeOrderButton"
+    android:id="@+id/pickaddressbtn"
 
     android:layout_alignParentBottom="true"
     android:layout_alignParentLeft="true"

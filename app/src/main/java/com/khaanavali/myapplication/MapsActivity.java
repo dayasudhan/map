@@ -11,6 +11,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +37,7 @@ public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
-    boolean markerClicked;
+    Button btnpicklocation;
     Marker mCurrLocationMarker;
     int zoomleval = 16;
     /**
@@ -44,10 +46,18 @@ public class MapsActivity extends FragmentActivity implements
      */
     private GoogleApiClient mGoogleApiClient;
     protected Location mLastLocation;
+    private LatLng mSelectedLatlang;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        btnpicklocation= (Button) findViewById(R.id.pickaddressbtn);
+        btnpicklocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setAddress(mSelectedLatlang.latitude,mSelectedLatlang.longitude);
+            }
+        });
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
         }
@@ -84,17 +94,18 @@ public class MapsActivity extends FragmentActivity implements
             mMap.setMyLocationEnabled(true);
         }
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(12.9716, 77.5946);
-        setPosition(sydney);
-//        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Bangalore"));
-//        //mCurrLocationMarker.setDraggable(true);
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomleval));
+        LatLng bangalore = new LatLng(12.9716, 77.5946);
+        setPosition(bangalore);
         mMap.setOnCameraChangeListener(this);
         mMap.setOnMyLocationButtonClickListener(this);
     }
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        getCurrentLocation();
+    }
 
+    public void getCurrentLocation()
+    {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION)
@@ -104,19 +115,6 @@ public class MapsActivity extends FragmentActivity implements
             }
         }
         setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
-        //Place current location marker
-//        LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-//        MarkerOptions markerOptions = new MarkerOptions();
-//        markerOptions.position(latLng);
-//        markerOptions.title("Current Position");
-////        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-//        mCurrLocationMarker = mMap.addMarker(markerOptions);
-//
-//        //move map camera
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-//        mMap.animateCamera(CameraUpdateFactory.zoomTo(zoomleval));
-//        //mGoogleMap.setOnCameraChangeListener(this);
-        // setAddress(mLastLocation.getLatitude(),mLastLocation.getLongitude());
     }
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
@@ -125,6 +123,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.animateCamera(CameraUpdateFactory.newLatLng(position));
         mCurrLocationMarker.setPosition(position);
         cameraPosition.toString();
+        mSelectedLatlang = position;
         // setAddress(position.latitude,position.longitude);
     }
     private void setPosition(LatLng latLng)
@@ -138,6 +137,7 @@ public class MapsActivity extends FragmentActivity implements
         mCurrLocationMarker = mMap.addMarker(markerOptions);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(zoomleval));
+        mSelectedLatlang = latLng;
     }
     public void setAddress(double latitude, double longitude)
     {
@@ -166,12 +166,6 @@ public class MapsActivity extends FragmentActivity implements
 
         myTextView.setText("Address is: " + filterAddress);
     }
-
-
-
-
-
-
 
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -278,7 +272,7 @@ public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     @Override
     public boolean onMyLocationButtonClick() {
-        setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+        getCurrentLocation();
         return false;
     }
 
