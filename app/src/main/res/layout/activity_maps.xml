@@ -20,5 +20,50 @@
         android:textSize="22sp" />
 
 
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:padding="10dip"
+    android:layout_height="120dp"
+    android:layout_alignParentBottom="true"
+    android:layout_width="match_parent" >
+
+
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:text="Point pin to your exact delivery location"
+    android:layout_gravity="center_horizontal"
+
+    android:padding="10dip"
+
+    android:id="@+id/textView4"
+    android:layout_above="@+id/placeOrderButton"
+    android:layout_centerHorizontal="true" />
+
+
+<View
+    android:layout_width="match_parent"
+    android:id="@+id/view2"
+    android:layout_height="1dp"
+
+    android:layout_below="@+id/textView4"
+    android:layout_marginTop="10dp"/>
+
+
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="PICK LOCATION"
+    android:textColor="#ffffff"
+    android:id="@+id/placeOrderButton"
+
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentRight="true"
+    android:clickable="true" />
+
+</RelativeLayout>
 
 </RelativeLayout>

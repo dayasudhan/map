@@ -31,12 +31,13 @@ import java.util.List;
 import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements
-        OnMapReadyCallback, GoogleMap.OnCameraChangeListener ,
+        OnMapReadyCallback, GoogleMap.OnCameraChangeListener ,GoogleMap.OnMyLocationButtonClickListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     boolean markerClicked;
     Marker mCurrLocationMarker;
+    int zoomleval = 16;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -84,12 +85,60 @@ public class MapsActivity extends FragmentActivity implements
         }
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(12.9716, 77.5946);
-        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Bangalore"));
-        mCurrLocationMarker.setDraggable(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 18));
+        setPosition(sydney);
+//        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Bangalore"));
+//        //mCurrLocationMarker.setDraggable(true);
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, zoomleval));
         mMap.setOnCameraChangeListener(this);
+        mMap.setOnMyLocationButtonClickListener(this);
     }
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
 
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+            }
+        }
+        setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+        //Place current location marker
+//        LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+//        MarkerOptions markerOptions = new MarkerOptions();
+//        markerOptions.position(latLng);
+//        markerOptions.title("Current Position");
+////        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+//        mCurrLocationMarker = mMap.addMarker(markerOptions);
+//
+//        //move map camera
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+//        mMap.animateCamera(CameraUpdateFactory.zoomTo(zoomleval));
+//        //mGoogleMap.setOnCameraChangeListener(this);
+        // setAddress(mLastLocation.getLatitude(),mLastLocation.getLongitude());
+    }
+    @Override
+    public void onCameraChange(CameraPosition cameraPosition) {
+
+        LatLng position = cameraPosition.target;
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(position));
+        mCurrLocationMarker.setPosition(position);
+        cameraPosition.toString();
+        // setAddress(position.latitude,position.longitude);
+    }
+    private void setPosition(LatLng latLng)
+    {
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+        if (mCurrLocationMarker != null) {
+            mCurrLocationMarker.remove();
+        }
+        mCurrLocationMarker = mMap.addMarker(markerOptions);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(zoomleval));
+    }
     public void setAddress(double latitude, double longitude)
     {
         String filterAddress = "";
@@ -117,94 +166,11 @@ public class MapsActivity extends FragmentActivity implements
 
         myTextView.setText("Address is: " + filterAddress);
     }
-    @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
-
-        LatLng position = cameraPosition.target;
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(position));
-        mCurrLocationMarker.setPosition(position);
-        cameraPosition.toString();
-        setAddress(position.latitude,position.longitude);
-    }
 
 
 
 
 
-//    @Override
-//    public boolean onMyLocationButtonClick() {
-//        // setCurrentLocation();
-//        return true;
-//    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
-        }
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-            }
-        }
-        //Place current location marker
-        LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Current Position");
-//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
-
-        //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(18));
-        //mGoogleMap.setOnCameraChangeListener(this);
-        setAddress(mLastLocation.getLatitude(),mLastLocation.getLongitude());
-    }
-//       public void setCurrentLocation()
-//    {
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                != PackageManager.PERMISSION_GRANTED) {
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(MapsActivity.this,
-//                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-//                new AlertDialog.Builder(this)
-//                        .setTitle("Permission Required")
-//                        .setMessage("This permission was denied earlier by you. This permission is required to map")
-//                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                dialog.dismiss();
-//                                ActivityCompat.requestPermissions(MapsActivity.this,
-//                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                                        1);
-//                            }
-//                        })
-//                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                dialog.dismiss();
-//                            }
-//                        })
-//                        .setIcon(android.R.drawable.ic_dialog_alert)
-//                        .show();
-//
-//            } else {
-//
-//                ActivityCompat.requestPermissions(MapsActivity.this,
-//                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                        1);
-//
-//            }
-//
-//            return;
-//        }
-//        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-//        if(mLastLocation != null) {
-//            Toast.makeText(MapsActivity.this, "LocationServices.FusedLocationApi", Toast.LENGTH_LONG).show();
-//            setAddress(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-//        }
-//    }
 
 
     protected synchronized void buildGoogleApiClient() {
@@ -242,40 +208,7 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-//    @Override
-//    public void onMapClick(LatLng latLng) {
-////        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-////
-////        markerClicked = false;
-//    }
-//
-//    @Override
-//    public void onMapLongClick(LatLng latLng) {
-////        mMap.addMarker(new MarkerOptions()
-////                .position(latLng)
-////                .draggable(true));
-////        perth.setPosition(latLng);
-////        markerClicked = false;
-//    }
-//
-//    @Override
-//    public void onMarkerDragStart(Marker marker) {
-//        Toast.makeText(MapsActivity.this, "onMarkerDragStart", Toast.LENGTH_SHORT).show();
-//    }
-//
-//    @Override
-//    public void onMarkerDrag(Marker marker) {
-//        Toast.makeText(MapsActivity.this, "onMarkerDrag", Toast.LENGTH_SHORT).show();
-//       // mMap.set
-//        perth.setPosition(marker.getPosition());
-//    }
-//
-//    @Override
-//    public void onMarkerDragEnd(Marker marker) {
-//
-//        perth.setPosition(marker.getPosition());
-//        mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-//    }
+
 public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     public boolean checkLocationPermission(){
         if (ContextCompat.checkSelfPermission(this,
@@ -343,4 +276,44 @@ public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
         }
     }
 
+    @Override
+    public boolean onMyLocationButtonClick() {
+        setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+        return false;
+    }
+
+    //    @Override
+//    public void onMapClick(LatLng latLng) {
+////        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+////
+////        markerClicked = false;
+//    }
+//
+//    @Override
+//    public void onMapLongClick(LatLng latLng) {
+////        mMap.addMarker(new MarkerOptions()
+////                .position(latLng)
+////                .draggable(true));
+////        perth.setPosition(latLng);
+////        markerClicked = false;
+//    }
+//
+//    @Override
+//    public void onMarkerDragStart(Marker marker) {
+//        Toast.makeText(MapsActivity.this, "onMarkerDragStart", Toast.LENGTH_SHORT).show();
+//    }
+//
+//    @Override
+//    public void onMarkerDrag(Marker marker) {
+//        Toast.makeText(MapsActivity.this, "onMarkerDrag", Toast.LENGTH_SHORT).show();
+//       // mMap.set
+//        perth.setPosition(marker.getPosition());
+//    }
+//
+//    @Override
+//    public void onMarkerDragEnd(Marker marker) {
+//
+//        perth.setPosition(marker.getPosition());
+//        mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+//    }
 }
